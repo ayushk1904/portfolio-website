@@ -312,15 +312,27 @@
       },
     };
 
-    function render(projectId) {
-      const project = projects[projectId];
-      if (!project) return;
+    const spotlight = qs(".project-spotlight", section);
+    const canFlip = !prefersReducedMotion && spotlight && typeof spotlight.animate === "function";
+    let currentId = null;
+    let flipping = false;
+    let queuedId = null;
 
+    // Preload previews so the flip never reveals a half-loaded image.
+    Object.values(projects).forEach((project) => {
+      new Image().src = assetPath(project.image);
+    });
+
+    function setActiveButton(projectId) {
       buttons.forEach((button) => {
         const isActive = button.dataset.project === projectId;
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
       });
+    }
+
+    function renderContent(projectId) {
+      const project = projects[projectId];
 
       if (image) {
         image.src = assetPath(project.image);
@@ -342,6 +354,58 @@
       }
     }
 
+    function render(projectId) {
+      if (!projects[projectId]) return;
+
+      setActiveButton(projectId);
+
+      if (flipping) {
+        queuedId = projectId;
+        return;
+      }
+
+      if (projectId === currentId) return;
+
+      const firstRender = currentId === null;
+      currentId = projectId;
+
+      if (!canFlip || firstRender) {
+        renderContent(projectId);
+        return;
+      }
+
+      flipping = true;
+      spotlight
+        .animate(
+          [
+            { transform: "perspective(1600px) rotateY(0deg)", opacity: 1 },
+            { transform: "perspective(1600px) rotateY(-90deg)", opacity: 0.35 },
+          ],
+          { duration: 200, easing: "ease-in" }
+        )
+        .finished.then(() => {
+          if (queuedId) {
+            currentId = queuedId;
+            queuedId = null;
+          }
+          renderContent(currentId);
+          return spotlight.animate(
+            [
+              { transform: "perspective(1600px) rotateY(90deg)", opacity: 0.35 },
+              { transform: "perspective(1600px) rotateY(0deg)", opacity: 1 },
+            ],
+            { duration: 280, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
+          ).finished;
+        })
+        .catch(() => renderContent(currentId))
+        .finally(() => {
+          flipping = false;
+          const next = queuedId;
+          queuedId = null;
+          if (next) render(next);
+        });
+    }
+
     buttons.forEach((button) => {
       button.addEventListener("click", () => render(button.dataset.project));
       button.addEventListener("mouseenter", () => {
@@ -353,6 +417,39 @@
     });
 
     render(buttons.find((button) => button.classList.contains("is-active"))?.dataset.project || "researchmate");
+  }
+
+  function initTiltCards() {
+    if (prefersReducedMotion) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    qsa(".skill-card, .info-card, .about-panel, .resume-card, .contact-info").forEach((card) => {
+      card.classList.add("tilt");
+
+      card.addEventListener("pointerenter", () => {
+        card.style.transition = "transform 140ms ease-out, opacity 620ms ease, border-color 180ms ease";
+        card.classList.add("is-tilting");
+      });
+
+      card.addEventListener("pointermove", (event) => {
+        const rect = card.getBoundingClientRect();
+        const maxTilt = rect.width > 600 ? 3 : 8;
+        const px = (event.clientX - rect.left) / rect.width;
+        const py = (event.clientY - rect.top) / rect.height;
+        const rotateX = (0.5 - py) * 2 * maxTilt;
+        const rotateY = (px - 0.5) * 2 * maxTilt;
+
+        card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+        card.style.setProperty("--glare-x", `${(px * 100).toFixed(1)}%`);
+        card.style.setProperty("--glare-y", `${(py * 100).toFixed(1)}%`);
+      });
+
+      card.addEventListener("pointerleave", () => {
+        card.style.transition = "transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 620ms ease, border-color 180ms ease";
+        card.style.transform = "";
+        card.classList.remove("is-tilting");
+      });
+    });
   }
 
   function initContactForm() {
@@ -438,10 +535,15 @@
       }
 
       const formData = new FormData(form);
-      formData.set("_subject", `Portfolio message from ${String(formData.get("name") || "a visitor")}`);
+      const senderName = String(formData.get("name") || "").trim() || "a visitor";
+      const topic = String(formData.get("subject") || "").trim();
+      formData.set("_subject", `Portfolio message from ${senderName}${topic ? `: ${topic}` : ""}`);
       formData.set("_replyto", String(formData.get("email") || ""));
 
-      fetch(form.action, {
+      // FormSubmit's AJAX endpoint returns JSON; the plain action URL is kept as the no-JS fallback.
+      const ajaxUrl = form.action.replace("formsubmit.co/", "formsubmit.co/ajax/");
+
+      fetch(ajaxUrl, {
         method: "POST",
         body: formData,
         headers: {
@@ -451,6 +553,12 @@
         .then((response) => {
           if (!response.ok) {
             throw new Error("Message delivery failed.");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (String(data.success) !== "true") {
+            throw new Error(data.message || "Message delivery failed.");
           }
 
           form.reset();
@@ -482,6 +590,7 @@
     initRevealAnimations();
     initTypingEffect();
     initProjectsShowcase();
+    initTiltCards();
     initContactForm();
     initFooterYear();
   }

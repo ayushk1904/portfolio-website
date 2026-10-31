@@ -1260,6 +1260,37 @@ blockquote {
   }
 }
 
+/* 3D effects */
+.tilt {
+  --glare-color: rgba(37, 99, 235, 0.1);
+  position: relative;
+  will-change: transform;
+}
+
+[data-theme="dark"] .tilt {
+  --glare-color: rgba(255, 255, 255, 0.09);
+}
+
+.tilt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), var(--glare-color), transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.tilt.is-tilting {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--line));
+  box-shadow: var(--shadow);
+}
+
+.tilt.is-tilting::after {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1269,4 +1300,13 @@ blockquote {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Hidden spam trap for bots; real visitors never see or fill it. */
+.form-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
