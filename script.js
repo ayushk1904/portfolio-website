@@ -202,8 +202,8 @@
 
     const roles = [
       "Full-Stack Developer",
-      "AI Enthusiast",
-      "Problem Solver"
+      "AI and RAG Developer",
+      "3D Visualization Explorer"
     ];
 
     let roleIndex = 0;
@@ -212,29 +212,32 @@
 
     function tick() {
       const role = roles[roleIndex];
-      target.textContent = role.slice(0, charIndex);
 
       if (!deleting) {
-        if (charIndex < role.length) {
-          charIndex += 1;
-          window.setTimeout(tick, charIndex === role.length ? 1100 : 68);
+        charIndex += 1;
+        target.textContent = role.slice(0, charIndex);
+
+        if (charIndex === role.length) {
+          deleting = true;
+          window.setTimeout(tick, 1800);
           return;
         }
 
-        deleting = true;
-        window.setTimeout(tick, 700);
+        window.setTimeout(tick, 68);
         return;
       }
 
-      if (charIndex > 0) {
-        charIndex -= 1;
-        window.setTimeout(tick, 42);
+      charIndex -= 1;
+      target.textContent = role.slice(0, charIndex);
+
+      if (charIndex === 0) {
+        deleting = false;
+        roleIndex = (roleIndex + 1) % roles.length;
+        window.setTimeout(tick, 260);
         return;
       }
 
-      deleting = false;
-      roleIndex = (roleIndex + 1) % roles.length;
-      window.setTimeout(tick, 260);
+      window.setTimeout(tick, 42);
     }
 
     target.textContent = "";
@@ -256,37 +259,36 @@
     const github = qs("[data-project-github]", section);
 
     const projects = {
-      swaad: {
+      researchmate: {
         kicker: "Flagship Project",
-        title: "Swaad Margdarshak",
+        title: "ResearchMate",
         summary:
-          "A multilingual, AI-driven culinary assistant designed to minimize food waste and simplify meal preparation through ingredient-based recipe recommendations.",
+          "A Retrieval-Augmented Generation (RAG) pipeline that ingests research-paper PDFs and answers user questions with grounded responses from a Gemini language model.",
         points: [
-          "AI-powered recipe generation",
-          "Ingredient-based recommendations",
-          "Multilingual support",
-          "Speech and text-to-speech assistance",
+          "PDF loading and text extraction",
+          "Chunking and embeddings",
+          "Vector storage and semantic search",
+          "Grounded answer generation",
         ],
-        tech: ["React", "Node.js", "Express.js", "MongoDB", "AI APIs"],
-        quote:
-          "Transforming available ingredients into meaningful meals through intelligent culinary assistance.",
-        image: "swaad margdarshak.png",
-        alt: "Swaad Margdarshak project preview",
-        github: "https://github.com/ayushk1904/swaad-margdarshak",
+        tech: ["Python", "PyMuPDF", "ChromaDB", "Gemini API"],
+        quote: "Ask questions about a research paper and get answers grounded in its own content.",
+        image: "researchmate.png",
+        alt: "ResearchMate project preview",
+        github: "https://github.com/ayushk1904/ResearchMate",
       },
       lakshya: {
         kicker: "Learning Project",
         title: "Lakshya",
         summary:
-          "An AI-powered academic ecosystem for study planning, goal tracking, progress monitoring, and AI proctoring.",
+          "An AI-powered self-study platform focused on study planning, task management, exam preparation, and progress tracking.",
         points: [
-          "Study planning and goal tracking",
-          "Progress monitoring",
-          "AI proctoring",
-          "Focus-first learning workflow",
+          "Personalized study planner",
+          "Task and exam preparation tracking",
+          "AI proctoring concept",
+          "Real-time study chat",
         ],
         tech: ["React", "Node.js", "MongoDB", "Computer Vision"],
-        quote: "Empowering students to learn smarter, stay focused, and achieve their goals.",
+        quote: "Helping students plan, prepare, and learn together.",
         image: "lakshya.png",
         alt: "Lakshya project preview",
         github: "https://github.com/ayushk1904/lakshya-ayush",
@@ -295,15 +297,15 @@
         kicker: "Career Project",
         title: "Manzil.com",
         summary:
-          "A personalized career roadmap platform that helps students connect academic aspirations with structured career planning.",
+          "A centralized academic and career resource hub for technical students, bringing key study and career references together in one place.",
         points: [
-          "Career guidance",
-          "Academic roadmaps",
-          "Goal tracking",
-          "Structured planning",
+          "Grid-based dashboard",
+          "Sticky navigation",
+          "Quick-reference cheat sheets",
+          "Academic and career resources",
         ],
-        tech: ["React", "JavaScript", "Node.js", "MongoDB"],
-        quote: "Guiding students from ambition to achievement through structured career planning.",
+        tech: ["HTML", "CSS", "JavaScript"],
+        quote: "Everything a technical student needs to look up, in one place.",
         image: "manzil.com.png",
         alt: "Manzil.com project preview",
         github: "https://github.com/ayushk1904/Manzil.com",
@@ -350,7 +352,7 @@
       button.addEventListener("focus", () => render(button.dataset.project));
     });
 
-    render(buttons.find((button) => button.classList.contains("is-active"))?.dataset.project || "swaad");
+    render(buttons.find((button) => button.classList.contains("is-active"))?.dataset.project || "researchmate");
   }
 
   function initContactForm() {
@@ -459,7 +461,7 @@
         .catch(() => {
           if (status) {
             status.textContent =
-              "I could not send the form right now. Please email me at kambleayush69@gmail.com.";
+              "I could not send the form right now. Please email me at kambleayusha92@gmail.com.";
           }
         });
     });
