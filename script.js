@@ -257,6 +257,7 @@
     const tech = qs("[data-project-tech]", section);
     const quote = qs("[data-project-quote]", section);
     const github = qs("[data-project-github]", section);
+    const demo = qs("[data-project-demo]", section);
 
     const projects = {
       researchmate: {
@@ -275,6 +276,7 @@
         image: "researchmate.png",
         alt: "ResearchMate project preview",
         github: "https://github.com/ayushk1904/ResearchMate",
+        demo: "https://research-mate-pi.vercel.app/",
       },
       lakshya: {
         kicker: "Learning Project",
@@ -291,24 +293,26 @@
         quote: "Helping students plan, prepare, and learn together.",
         image: "lakshya.png",
         alt: "Lakshya project preview",
-        github: "https://github.com/ayushk1904/lakshya-ayush",
+        github: "https://github.com/ayushk1904/Lakshya_ayush",
+        demo: "https://lakshya-ayush.vercel.app/",
       },
       manzil: {
         kicker: "Career Project",
-        title: "Manzil.com",
+        title: "Manzil AI",
         summary:
-          "A centralized academic and career resource hub for technical students, bringing key study and career references together in one place.",
+          "An AI-powered career and learning platform whose agent reads a user's resume, finds real job openings, ranks them by fit, and shows which required skills are missing.",
         points: [
-          "Grid-based dashboard",
-          "Sticky navigation",
-          "Quick-reference cheat sheets",
-          "Academic and career resources",
+          "Resume-based job matching",
+          "Skill-gap and interview guidance",
+          "Tailored cover letter drafts",
+          "Resource Hub study boards",
         ],
-        tech: ["HTML", "CSS", "JavaScript"],
-        quote: "Everything a technical student needs to look up, in one place.",
-        image: "manzil.com.png",
-        alt: "Manzil.com project preview",
-        github: "https://github.com/ayushk1904/Manzil.com",
+        tech: ["Python", "FastAPI", "LangGraph", "Ollama"],
+        quote: "Career advice based on your actual experience, rather than generic tips.",
+        image: "manzil-ai.png",
+        alt: "Manzil AI project preview",
+        github: "https://github.com/ayushk1904/Manzil-AI",
+        demo: "https://hearing-clean-morrison-fever.trycloudflare.com/",
       },
     };
 
@@ -344,6 +348,7 @@
       if (summary) summary.textContent = project.summary;
       if (quote) quote.textContent = project.quote;
       if (github) github.setAttribute("href", project.github);
+      if (demo) demo.setAttribute("href", project.demo);
 
       if (points) {
         points.innerHTML = project.points.map((point) => `<li>${point}</li>`).join("");
